@@ -4,29 +4,30 @@ class MoviesController < ApplicationController
   before_action :set_params, only: [:show, :update, :delete]
 
   def index 
-    # binding.pry
     @movies = current_member.movies
   end
 
   def show
-    # binding.pry
   end
 
   def create
-    binding.pry
-    raise "user not found" unless current_member.is_a?(User)
-
-    @movie = Movie.new(movie_params)
+    raise Forbidden unless current_member.is_a?(User)
+    raise BadRequest, code: "genre not found" unless params[:genre_id].present?
+    @movie = Movie.new 
+    @movie.assign_attributes  movie_params
     @movie.user_id = current_member.id
-    if @movie.save
-      render :show, status: :created
-    else 
-      raise "Error #{@movie.errors.full_messages}"
+    @movie.genre_id = params[:genre_id].to_i
+    ActiveRecord::Base.transaction do
+      if @movie.save
+        render :show, status: :created
+      else 
+        raise "Error #{@movie.errors.full_messages}"
+      end
     end
   end
 
   def update
-    raise 'user not found' unless current_member.is_a?(User)
+    raise Forbidden unless current_member.is_a?(User)
 
     @movie.update! movie_params
 
@@ -40,21 +41,22 @@ class MoviesController < ApplicationController
 
   private
   def set_params
-    @movie = current_member.movies.find_by(id: params[:id])
+    @movie = current_member.movies.find_by id: params[:id]
   end
 
   def movie_params
-    params.permit(:name, :director, :star, :release_date, :summary, :user_id, :genre_id)
-    raise 'name is valid error' unless params[:name].present?
-    raise 'name is valid error' unless params[:name].is_a?(String)
-    raise 'director is valid error' unless params[:director].present?
-    raise 'director is valid error' unless params[:director].is_a?(String)
-    raise 'star is valid error' unless params[:star].present?
-    raise 'star is valid error' unless params[:star].is_a?(String)
+    _params = params.require(:movie).permit :name, :director, :star, :release_date, :summary, :genre_id
+    raise BadRequest, code: 'name is valid error' unless _params[:name].present?
+    raise BadRequest, code: 'name is valid error' unless _params[:name].is_a?(String)
+    raise BadRequest, code: 'director is valid error' unless _params[:director].present?
+    raise BadRequest, code: 'director is valid error' unless _params[:director].is_a?(String)
+    raise BadRequest, code: 'star is valid error' unless _params[:star].present?
+    raise BadRequest, code: 'star is valid error' unless _params[:star].is_a?(String)
 
-    raise 'release_date is valid error' unless params[:release_date].present?
-    raise 'release_date is valid error' unless params[:release_date].is_a?(String)
-    raise 'summary is valid error' unless params[:summary].present?
-    raise 'summary is valid error' unless params[:summary].is_a?(String)
+    raise BadRequest, code: 'release_date is valid error' unless _params[:release_date].present?
+    raise BadRequest, code: 'release_date is valid error' unless _params[:release_date].is_a?(String)
+    raise BadRequest, code: 'summary is valid error' unless _params[:summary].present?
+    raise BadRequest, code: 'summary is valid error' unless _params[:summary].is_a?(String)
+    _params
   end
 end
