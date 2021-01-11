@@ -5,23 +5,25 @@ class Devise::SessionsController < DeviseTokenAuth::SessionsController
     @resource = nil
     if field
       q_value = resource_params[field]
+
       if resource_class.case_insensitive_keys.include?(field)
-        q_value.downcase
+        q_value.downcase!
       end
 
-      q = "#{field.to_s} = ? AND provider = 'email'"
+      q = "#{field.to_s} = ? AND provider='email'"
 
-      if ActiveRecord::Base.connection.adapter_name.downcase.start_with? "psql"
+      if ActiveRecord::Base.connection.adapter_name.downcase.start_with? "mysql"
         q = "BINARY " + q
       end
       # LOG IN BY EMAIL AND USERNAME
-      if field == :login
-        @resource = resource_class.where("email = ? OR username = ?", q_value, q_value).first
-      else
+      # if field == :login
+        # @resource = resource_class.where("email = ? OR username = ?", q_value, q_value).first
+      # else
         @resource = resource_class.where(q, q_value).first
-      end
+      # end
       # LOG IN BY EMAIL AND USERNAME END
     end
+
     if @resource && valid_params?(field, q_value) && (!@resource.respond_to?(:active_for_authentication?) || @resource.active_for_authentication?)
       valid_password = @resource.valid_password?(resource_params[:password])
       if (@resource.respond_to?(:valid_for_authentication?) && !@resource.valid_for_authentication? { valid_password }) || !valid_password
@@ -30,10 +32,10 @@ class Devise::SessionsController < DeviseTokenAuth::SessionsController
       end
       # create client id
       @client_id = SecureRandom.urlsafe_base64(nil, false)
-      @tokens     = SecureRandom.urlsafe_base64(nil, false)
+      @token     = @resource.create_token
 
       @resource.tokens[@client_id] = {
-        token: BCrypt::Password.create(@tokens),
+        token: BCrypt::Password.create(@token),
         expiry: (Time.now + ::DeviseTokenAuth.token_lifespan).to_i
       }
       @resource.save
@@ -62,7 +64,7 @@ class Devise::SessionsController < DeviseTokenAuth::SessionsController
   end
 
   def render_create_success
-    render json: {success: true, data: JSON.parse(@resource.to_jbuilder.target!)}
+    render json: {success: true, data: JSON.parse(@resource.to_builder.target!)}
   end
 
   def render_create_error_not_confirmed

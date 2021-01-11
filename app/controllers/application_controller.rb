@@ -10,19 +10,6 @@ class ApplicationController < ActionController::API
   HTTPResponseErrors.each do |code, status|
     class_eval <<-EOS
       rescue_from(#{code.to_s.camelize}) {|e| render_error e }
-      class #{code.to_s.camelize} < HTTPResponseError
-        def status
-          HTTPResponseErrors[:#{code}]
-        end
-
-        def code
-          @code || "#{code}"
-        end
-
-        def message
-          @message || ("#{status} " + capitalize_with_space("#{code}"))
-        end
-      end
     EOS
   end
 
@@ -34,5 +21,5 @@ class ApplicationController < ActionController::API
     response.headers['Expires']         = '0'
     response.headers['X-Frame-Options'] = 'DENY'
   end
-  
+
 end

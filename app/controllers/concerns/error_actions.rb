@@ -1,4 +1,3 @@
-require "active_support/concern"
 module ErrorActions
   extend ActiveSupport::Concern
 
@@ -13,7 +12,9 @@ module ErrorActions
     }.to_json
   end
 
-  def render_error(exception, status)
+  def render_error(exception)
     render json: error_json(exception), status: exception.status
   end
 end
+
+
