@@ -11,5 +11,8 @@ Rails.application.routes.draw do
   resources :users
   resources :movies
   resources :genres
-
+  
+  require 'sidekiq/web'
+  mount Sidekiq::Web => '/sidekiq'
+  # mount ActionCable.server => '/cable' #kich hoat actioncable
 end

@@ -13,6 +13,7 @@ class Devise::UserRegistrationsController < DeviseTokenAuth::RegistrationsContro
         raise BadRequest, code: 'user_blank_email_error'          unless _params[:email].present?
         raise BadRequest, code: 'user_invalid_email_error'        unless _params[:email].is_a?(String)
         _params[:email].strip!
+        _params[:email].gsub!('ｰ', '-')
         raise BadRequest, code: 'user_blank_username_error'       unless _params[:username].present?
         raise BadRequest, code: 'user_invalid_username_error'     unless _params[:username].is_a?(String)
         raise BadRequest, code: 'user_too_short_username_error'   unless _params[:username].size >= User::USERNAME_MIN_SIZE
@@ -22,7 +23,7 @@ class Devise::UserRegistrationsController < DeviseTokenAuth::RegistrationsContro
         raise BadRequest, code: 'user_invalid_password_error'     unless _params[:password].is_a?(String)
         raise BadRequest, code: 'user_too_short_password_error'   unless _params[:password].size >= User::PASSWORD_MIN_SIZE
         raise BadRequest, code: 'user_too_long_password_error'    unless _params[:password].size <= User::PASSWORD_MAX_SIZE
-
+        _params[:password_confirmation] = _params[:password]
         _params
       end
     end
