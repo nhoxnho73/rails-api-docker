@@ -1,0 +1,11 @@
+class AddGenreWorker
+  require 'csv'
+  include Sidekiq::Worker
+  sidekiq_options retry: false
+
+  def perform(csv_file)
+    CSV.foreach(csv_file, headers: true) do |genre|
+      Genre.create(name: genre[0])
+    end
+  end
+end

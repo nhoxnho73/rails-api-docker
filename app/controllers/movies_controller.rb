@@ -10,6 +10,12 @@ class MoviesController < ApplicationController
   def show
   end
 
+  def upload
+    csv_file = File.join Rails.root, 'db', 'movies.csv'
+    ::AddMovieWorker.perform_async(csv_file)
+    render :index
+  end
+
   def create
     raise Forbidden unless current_member.is_a?(User)
     raise BadRequest, code: "genre not found" unless params[:genre_id].present?
@@ -19,6 +25,7 @@ class MoviesController < ApplicationController
     @movie.genre_id = params[:genre_id].to_i
     ActiveRecord::Base.transaction do
       if @movie.save
+        MovieMailer.with(movie: @movie).movie_mail.deliver_later
         render :show, status: :created
       else 
         raise "Error #{@movie.errors.full_messages}"

@@ -10,6 +10,7 @@ COPY . /demo-ruby
 COPY entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
+# Open port outside docker
 EXPOSE 3000
 # Start the main process.
 CMD ["rails", "server", "0.0.0.0"]

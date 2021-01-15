@@ -8,6 +8,12 @@ class GenresController < ApplicationController
     @genres = Genre.all
   end
 
+  def upload
+    csv_file = File.join Rails.root, 'db', 'genres.csv'
+    AddGenreWorker.perform_async(csv_file)
+    render :index
+  end
+
   def create
     raise Forbidden unless current_member.is_a?(User)
     @genre = Genre.new 
@@ -34,7 +40,7 @@ class GenresController < ApplicationController
   end
 
   def set_params
-    @genre = Genre.find params[:id]
+    @genre = Genre.find_by id: params[:id]
   end
   private
 

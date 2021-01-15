@@ -19,7 +19,7 @@ class Devise::SessionsController < DeviseTokenAuth::SessionsController
       # if field == :login
         # @resource = resource_class.where("email = ? OR username = ?", q_value, q_value).first
       # else
-        @resource = resource_class.where(q, q_value).first
+      @resource = resource_class.where(q, q_value).first
       # end
       # LOG IN BY EMAIL AND USERNAME END
     end
