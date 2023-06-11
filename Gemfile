@@ -30,6 +30,7 @@ gem 'devise_token_auth'
 gem 'omniauth'
 gem "fcm"
 gem 'figaro'
+gem 'mimemagic', github: 'mimemagicrb/mimemagic', ref: '01f92d86d15d85cfd0f20dabd025dcbd36a8a60f'
 
 gem "letter_opener", :group => :development
 group :development, :test do
